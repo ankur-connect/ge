@@ -275,7 +275,7 @@ class AttnDecoderRNN(nn.Module):
 
 clip = 5.0
 
-def train(input_variable, target_variable, encoder, decoder, encoder_optimizer, decoder_optimizer,          criterion, batch_size, max_length):
+def train(input_variable, target_variable, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion, batch_size, seq_length):
 
     # Zero gradients of both optimizers
     encoder_optimizer.zero_grad()
@@ -384,7 +384,7 @@ print_loss_total = 0 # Reset every print_every
 plot_loss_total = 0 # Reset every plot_every
 
 #set up for training
-n_epochs = 30
+n_epochs = 6
 variables = [variablesFromPair(pair, seq_len=SEQ_LENGTH) for pair in pairs]
 n_iters = math.floor(int(len(variables)/BATCH_SIZE))
 
@@ -424,7 +424,7 @@ for epoch in range(n_epochs+1):
 
 # # Evaluating the network
 
-def evaluate(pairs, seq_length = SEQ_LENGTH, batch_size = BATCH_SIZE, max_length=MAX_LENGTH):
+def evaluate(pairs, seq_length = SEQ_LENGTH, batch_size = BATCH_SIZE):
     
     # get a random batch
     shuffle(pairs)
@@ -457,11 +457,11 @@ def evaluate(pairs, seq_length = SEQ_LENGTH, batch_size = BATCH_SIZE, max_length
         decoder_context = decoder_context.cuda()
     
     decoded_words = []
-    decoder_attentions = torch.zeros(max_length, max_length)
+    decoder_attentions = torch.zeros(seq_length, seq_length)
     
     # Run through decoder
     
-    for di in range(max_length):
+    for di in range(seq_length):
         decoder_output, decoder_context, decoder_hidden, decoder_attention = decoder(decoder_input, decoder_context, decoder_hidden, encoder_outputs)
 
         topv, topi = decoder_output.data.topk(1)
