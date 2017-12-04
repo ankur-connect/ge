@@ -337,7 +337,8 @@ def train(input_variable, target_variable, encoder, decoder, encoder_optimizer, 
         ni = topi.squeeze(1)
 
         decoder_input = Variable(ni) # Chosen word is next input
-        if USE_CUDA: decoder_input = decoder_input.cuda()
+        if USE_CUDA: 
+            decoder_input = decoder_input.cuda()
 
     # Backpropagation
     loss.backward()

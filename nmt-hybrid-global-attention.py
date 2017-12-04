@@ -510,7 +510,8 @@ def evaluate(pairs, seq_length = SEQ_LENGTH, batch_size = BATCH_SIZE):
         decoded_words.append(batch_decoded_words)
             
         decoder_input = Variable(ni) # Chosen word is next input
-        if USE_CUDA: decoder_input = decoder_input.cuda()
+        if USE_CUDA: 
+            decoder_input = decoder_input.cuda()
             
     decoded_words_matrix = np.array(decoded_words).reshape((SEQ_LENGTH, BATCH_SIZE))
         
