@@ -21,7 +21,7 @@ from random import shuffle
 import math
 from torch.utils.data import Dataset
 
-sys.stdout=open('progress_update_big_data.txt','w')
+sys.stdout=open('progress_update_small_data.txt','w')
 
 '''This module trains a word-level model similar to Luong et al 2015.
 To call this module, use:
@@ -69,6 +69,30 @@ def readLangs(seq1, seq2):
     return pairs
 
 pairs = readLangs(DE_seq, EN_seq)
+
+#will ultimately remove this and set MAX_LENGTH to either 50 like the paper or the longest sentence in corpus
+MAX_LENGTH = 10
+
+eng_prefixes = (
+    "i am ", "i m ",
+    "he is", "he s ",
+    "she is", "she s",
+    "you are", "you re ",
+    "we are", "we re ",
+    "they are", "they re "
+)
+
+
+def filterPair(p):
+    return len(p[0].split(' ')) < MAX_LENGTH and \
+        len(p[1].split(' ')) < MAX_LENGTH  \
+        and p[1].startswith(eng_prefixes)
+
+
+def filterPairs(pairs):
+    return [pair for pair in pairs if filterPair(pair)]
+
+pairs = filterPairs(pairs)
 
 def find_vocabulary(seq, vocab_size):
     counter = Counter()
@@ -334,10 +358,10 @@ def custom_schedule(epoch):
     elif epoch >= 4:
         return (.5**(1+(epoch - 3)))
 
-hidden_size = 1024
-BATCH_SIZE = 64 #got a memory error when using batch size of 128 from the paper
+hidden_size = 512
+BATCH_SIZE = 32
 N_LAYERS = 4
-SEQ_LENGTH = 50
+SEQ_LENGTH = 10
 if sys.argv[1] == "True":
     learning_rate = 1
 else:
@@ -416,10 +440,10 @@ print_loss_total = 0 # Reset every print_every
 print_loss_num = 0 # Reset every plot_every
 
 #set up for training
-n_epochs = 6
+n_epochs = 30
 
 print("begin training ")
-print(str(start))
+print(start)
 print("\n")
 
 #train
@@ -451,9 +475,8 @@ for epoch in range(1,n_epochs+1):
     print_loss_avg = print_loss_total / print_loss_num
     print_loss_total = 0
     print_loss_num = 0
-    print(str(time_since(start, epoch/n_epochs)))
-    print(str(print_loss_avg))
-    print("\n")   
+    # file-output.py
+    print(str(time_since(start, epoch/n_epochs)) + ' ' + str(print_loss_avg) + "\n") 
 
 torch.save(encoder.state_dict(), "saved_encoder.pth")
 torch.save(decoder.state_dict(), "saved_decoder.pth")
